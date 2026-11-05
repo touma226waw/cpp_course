@@ -18,7 +18,86 @@ namespace aim::q4 {
 struct CommandResult { long long value; int accepted; int rejected; };
 
 // BEGIN IMPLEMENTATION
-CommandResult execute(const std::vector<std::string>& lines) { throw std::runtime_error("TODO"); }
+CommandResult execute(const std::vector<std::string>& lines) {
+    //初始化数据
+    long long value = 0;
+    int accepted = 0;
+    int rejected = 0;
+    //遍历识别line
+    for (const std::string& line : lines) {
+        //读取line行
+        std::istringstream iss(line);
+        std::string command;
+        iss >> command;
+        //检查line合法
+         if (command == ""|| (command != "ADD" && command != "SET" && command != "RESET")) {
+            rejected++;
+            continue;
+         }
+        //检查line字符
+        //添加字符
+        if (command == "ADD") {
+            //添加非法
+            long long x;
+            std::string extra;
+            //x范围错误or缺少数据
+            if (!(iss >> x) || x < -1000000 || x > 1000000) {
+                rejected++;
+                continue;
+            }
+            //溢出
+            long long candidate = value + x;
+            if (candidate < -1000000 || candidate > 1000000) {
+                rejected++;
+                continue;
+            }
+            //多余数据
+            if (iss >> extra) {
+                rejected++;
+                continue;
+            }
+            //添加合法
+            value += x;
+            accepted++;
+        }
+        //设置字符
+        else if (command == "SET") {
+            //设置非法
+            long long x;
+            std::string extra;
+            //x范围错误or缺少数据
+            if (!(iss >> x )|| x < -1000000 || x > 1000000) {
+                rejected++;
+                continue;
+            }
+            //多余数据
+            else if (iss >> extra) {
+                rejected++;
+                continue;
+            }
+            //设置合法
+            else {
+                value = x;
+                accepted++;
+            }
+        }
+        //重置字符
+        else if (command == "RESET") {
+            //多余数据
+            std::string extra;
+            if (iss >> extra) {
+                rejected++;
+                continue;
+            }
+            //重置合法
+            else {
+                value = 0;
+                accepted++;
+            }
+        }
+    }
+    return {value, accepted, rejected};
+}
 // END IMPLEMENTATION
 }
 
